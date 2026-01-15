@@ -1,13 +1,16 @@
 /**
  * App.jsx
- * Simple router (no external libs) for Part A.
+ * Simple router (no external libs) for POS + Admin.
  * Routes:
- * - /login : employee login
- * - /pos   : POS screen (requires session)
+ * - /login         : employee login
+ * - /pos           : POS screen (requires session)
+ * - /admin/login   : admin login
+ * - /admin/*       : admin pages (Part B)
  */
 import React, { useEffect, useState } from "react";
 import Login from "./pages/Login";
 import POS from "./pages/POS";
+import AdminApp from "./admin/AdminApp";
 import { getSession } from "./services/storage";
 
 function getPath() {
@@ -28,6 +31,11 @@ export default function App() {
     window.history.pushState({}, "", to);
     setPath(to);
     setSession(getSession());
+  }
+
+  // Admin area is handled separately
+  if (path.startsWith("/admin")) {
+    return <AdminApp />;
   }
 
   // Guard: if not logged in, always go to /login
