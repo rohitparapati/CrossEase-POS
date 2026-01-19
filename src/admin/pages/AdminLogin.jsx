@@ -1,16 +1,23 @@
 /**
  * AdminLogin.jsx
  * Admin login screen (mock for Part B).
- * B1 will add real session + guard logic.
+ * B1 adds localStorage session + simple auth against seeded admin users.
  *
- * Connected to: src/admin/AdminApp.jsx (onSuccess redirect)
+ * Connected to:
+ * - src/services/adminStorage.js (authenticateAdmin, setAdminSession)
+ * - src/admin/AdminApp.jsx (onSuccess redirect)
  */
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { authenticateAdmin, ensureAdminSeed, setAdminSession } from "../../services/adminStorage";
 
 export default function AdminLogin({ onSuccess }) {
   const [username, setUsername] = useState("admin");
   const [password, setPassword] = useState("admin");
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    ensureAdminSeed();
+  }, []);
 
   function submit(e) {
     e.preventDefault();
@@ -21,7 +28,13 @@ export default function AdminLogin({ onSuccess }) {
       return;
     }
 
-    // Part B0 mock: accept anything
+    const session = authenticateAdmin(username, password);
+    if (!session) {
+      setError("Invalid admin credentials. Try admin/admin.");
+      return;
+    }
+
+    setAdminSession(session);
     onSuccess();
   }
 
@@ -63,7 +76,7 @@ export default function AdminLogin({ onSuccess }) {
           </button>
 
           <p className="hint">
-            Part B uses mock auth. Part C will use SQL + hashed passwords + JWT.
+            Default (mock): <b>admin / admin</b>. Part C will use SQL + hashed passwords + JWT.
           </p>
         </form>
       </div>
