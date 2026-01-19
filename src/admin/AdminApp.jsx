@@ -1,16 +1,19 @@
 /**
  * AdminApp.jsx
  * Admin panel shell + tiny router for /admin pages (no external libs).
- * Pages:
- * - /admin/login
- * - /admin/dashboard
+ * B1 adds:
+ * - admin session from localStorage
+ * - route guard (/admin/* requires session except /admin/login)
+ * - logout clears session
  *
  * Connected to:
  * - src/App.jsx (mounts AdminApp under /admin)
+ * - src/services/adminStorage.js (get/clear session)
  */
 import React, { useEffect, useState } from "react";
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
+import { clearAdminSession, getAdminSession } from "../services/adminStorage";
 
 function getAdminPath() {
   const full = window.location.pathname || "/";
@@ -26,6 +29,7 @@ function go(to) {
 
 export default function AdminApp() {
   const [path, setPath] = useState(getAdminPath());
+  const [adminSession, setAdminSessionState] = useState(getAdminSession());
 
   useEffect(() => {
     const onPop = () => setPath(getAdminPath());
@@ -33,20 +37,42 @@ export default function AdminApp() {
     return () => window.removeEventListener("popstate", onPop);
   }, []);
 
-  // For B0, no auth guard yet — B1 will add it
-  const page =
-    path === "/admin/login" ? (
-      <AdminLogin onSuccess={() => go("/admin/dashboard")} />
-    ) : (
-      <AdminShell onLogout={() => go("/admin/login")}>
-        <AdminDashboard />
-      </AdminShell>
-    );
+  // ===== B1 Guard =====
+  useEffect(() => {
+    const s = getAdminSession();
+    setAdminSessionState(s);
 
-  return page;
+    // if not logged in => force /admin/login
+    if (!s && path !== "/admin/login") {
+      go("/admin/login");
+      return;
+    }
+
+    // if logged in and hits login => redirect to dashboard
+    if (s && path === "/admin/login") {
+      go("/admin/dashboard");
+      return;
+    }
+  }, [path]);
+
+  function logout() {
+    clearAdminSession();
+    setAdminSessionState(null);
+    go("/admin/login");
+  }
+
+  if (path === "/admin/login") {
+    return <AdminLogin onSuccess={() => go("/admin/dashboard")} />;
+  }
+
+  return (
+    <AdminShell session={adminSession} onLogout={logout}>
+      <AdminDashboard />
+    </AdminShell>
+  );
 }
 
-function AdminShell({ children, onLogout }) {
+function AdminShell({ children, onLogout, session }) {
   const [active, setActive] = useState("dashboard");
 
   function nav(id, to) {
@@ -59,6 +85,10 @@ function AdminShell({ children, onLogout }) {
       {/* ===== Admin Sidebar ===== */}
       <aside className="admin-sidebar">
         <div className="admin-brand">Admin Panel</div>
+
+        <div className="muted small">
+          Logged in as: <b>{session?.username || "admin"}</b>
+        </div>
 
         <button
           className={`admin-nav ${active === "dashboard" ? "admin-nav-active" : ""}`}
