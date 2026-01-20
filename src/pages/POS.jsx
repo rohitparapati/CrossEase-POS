@@ -14,7 +14,7 @@
  * - src/services/storage.js (session, addSale, receipt number)
  */
 import React, { useMemo, useRef, useState } from "react";
-import { MOCK_PRODUCTS } from "../data/mockProducts";
+import { ensureProductsSeed, getActiveProducts } from "../services/productsStore";
 import { addSale, clearSession, nextReceiptNo } from "../services/storage";
 import ReceiptModal from "../components/ReceiptModal";
 
@@ -48,10 +48,11 @@ export default function POS({ onLogout, session }) {
 
   const scanRef = useRef(null);
 
-  const activeProducts = useMemo(
-    () => MOCK_PRODUCTS.filter((p) => p.status === "active"),
-    []
-  );
+  const activeProducts = useMemo(() => {
+  ensureProductsSeed();
+  return getActiveProducts();
+}, []);
+
 
   const filteredProducts = useMemo(() => {
     const q = search.trim().toLowerCase();
