@@ -1,10 +1,11 @@
 /**
  * AdminApp.jsx
  * Admin panel shell + tiny router for /admin pages (no external libs).
- * B1 adds:
- * - admin session from localStorage
- * - route guard (/admin/* requires session except /admin/login)
- * - logout clears session
+ * Guarded by admin session (Part B1).
+ * Routes:
+ * - /admin/login
+ * - /admin/dashboard
+ * - /admin/products
  *
  * Connected to:
  * - src/App.jsx (mounts AdminApp under /admin)
@@ -13,6 +14,7 @@
 import React, { useEffect, useState } from "react";
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
+import AdminProducts from "./pages/AdminProducts";
 import { clearAdminSession, getAdminSession } from "../services/adminStorage";
 
 function getAdminPath() {
@@ -37,18 +39,16 @@ export default function AdminApp() {
     return () => window.removeEventListener("popstate", onPop);
   }, []);
 
-  // ===== B1 Guard =====
+  // ===== Guard =====
   useEffect(() => {
     const s = getAdminSession();
     setAdminSessionState(s);
 
-    // if not logged in => force /admin/login
     if (!s && path !== "/admin/login") {
       go("/admin/login");
       return;
     }
 
-    // if logged in and hits login => redirect to dashboard
     if (s && path === "/admin/login") {
       go("/admin/dashboard");
       return;
@@ -65,18 +65,26 @@ export default function AdminApp() {
     return <AdminLogin onSuccess={() => go("/admin/dashboard")} />;
   }
 
+  let page = <AdminDashboard />;
+  let active = "dashboard";
+
+  if (path === "/admin/products") {
+    page = <AdminProducts />;
+    active = "products";
+  } else if (path === "/admin/dashboard") {
+    page = <AdminDashboard />;
+    active = "dashboard";
+  }
+
   return (
-    <AdminShell session={adminSession} onLogout={logout}>
-      <AdminDashboard />
+    <AdminShell session={adminSession} onLogout={logout} active={active}>
+      {page}
     </AdminShell>
   );
 }
 
-function AdminShell({ children, onLogout, session }) {
-  const [active, setActive] = useState("dashboard");
-
-  function nav(id, to) {
-    setActive(id);
+function AdminShell({ children, onLogout, session, active }) {
+  function nav(to) {
     go(to);
   }
 
@@ -92,18 +100,23 @@ function AdminShell({ children, onLogout, session }) {
 
         <button
           className={`admin-nav ${active === "dashboard" ? "admin-nav-active" : ""}`}
-          onClick={() => nav("dashboard", "/admin/dashboard")}
+          onClick={() => nav("/admin/dashboard")}
           type="button"
         >
           Dashboard
         </button>
 
-        {/* These pages will be added in later micro-steps */}
-        <button className="admin-nav" disabled type="button" title="Coming next">
-          Products (next)
+        <button
+          className={`admin-nav ${active === "products" ? "admin-nav-active" : ""}`}
+          onClick={() => nav("/admin/products")}
+          type="button"
+        >
+          Products
         </button>
-        <button className="admin-nav" disabled type="button" title="Coming later">
-          Inventory
+
+        {/* Coming in later micro-steps */}
+        <button className="admin-nav" disabled type="button" title="Coming next">
+          Inventory (next)
         </button>
         <button className="admin-nav" disabled type="button" title="Coming later">
           Deliveries

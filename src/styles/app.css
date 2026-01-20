@@ -436,3 +436,43 @@ body {
   background: rgba(255,255,255,0.04);
 }
 .right { text-align: right; }
+
+/* ===== Admin Products ===== */
+.admin-products {
+  display: grid;
+  gap: 14px;
+}
+
+.products-form {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+@media (max-width: 980px) {
+  .products-form { grid-template-columns: 1fr; }
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.checkbox input {
+  width: 18px;
+  height: 18px;
+}
+
+.products-form button {
+  align-self: end;
+  height: 44px;
+}
+
+/* Better table layout for products */
+.products-head, .products-row {
+  grid-template-columns: 1.3fr 1fr 0.8fr 0.5fr 0.5fr 0.8fr;
+}
+@media (max-width: 980px) {
+  .products-head, .products-row {
+    grid-template-columns: 1fr;
+  }
+}
