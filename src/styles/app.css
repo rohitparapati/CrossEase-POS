@@ -389,3 +389,50 @@ body {
 .admin-page {
   margin-top: 14px;
 }
+/* ===== Admin Dashboard ===== */
+.admin-dashboard {
+  display: grid;
+  gap: 14px;
+}
+
+.dash-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+@media (max-width: 980px) {
+  .dash-cards { grid-template-columns: 1fr; }
+}
+
+.dash-card {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: rgba(255,255,255,0.03);
+  padding: 12px;
+}
+.dash-value {
+  font-size: 26px;
+  font-weight: 1000;
+  margin-top: 6px;
+  margin-bottom: 4px;
+}
+
+/* ===== Simple Table ===== */
+.table {
+  display: grid;
+  gap: 8px;
+}
+.table-head, .table-row {
+  display: grid;
+  grid-template-columns: 1.4fr 0.8fr 0.8fr 0.6fr;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: rgba(255,255,255,0.02);
+}
+.table-head {
+  font-weight: 1000;
+  background: rgba(255,255,255,0.04);
+}
+.right { text-align: right; }
